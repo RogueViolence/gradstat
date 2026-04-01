@@ -1,0 +1,902 @@
+[index.html](https://github.com/user-attachments/files/26399131/index.html)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GradStat — Your Stats Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-mid: #1D9E75;
+    --green-dark: #085041;
+    --text: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #888;
+    --border: #e0e0e0;
+    --bg: #fafaf8;
+    --bg-card: #ffffff;
+    --bg-secondary: #f5f4f0;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { font-style: italic; font-weight: 400; }
+
+  .sessions-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+  }
+
+  .sessions-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green-mid);
+  }
+
+  .sessions-dot.warn { background: #EF9F27; }
+  .sessions-dot.out { background: #E24B4A; }
+
+  /* Main layout */
+  .main {
+    display: flex;
+    flex: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 2rem 1.5rem;
+    gap: 1.5rem;
+    flex-direction: column;
+  }
+
+  /* Welcome screen */
+  .welcome {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+  }
+
+  .welcome-tag {
+    display: inline-block;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.04em;
+  }
+
+  .welcome h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .welcome h1 em { color: var(--green); font-style: italic; }
+
+  .welcome p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 2rem;
+    font-weight: 300;
+  }
+
+  .start-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .start-card {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .start-card:hover {
+    border-color: var(--green-mid);
+    box-shadow: 0 2px 12px rgba(15,110,86,0.08);
+  }
+
+  .start-card-icon { font-size: 22px; margin-bottom: 8px; }
+  .start-card-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .start-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Data input section */
+  .data-section {
+    display: none;
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .data-section.active { display: block; }
+
+  .data-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .data-header-left { display: flex; align-items: center; gap: 10px; }
+  .data-header-title { font-size: 14px; font-weight: 500; }
+  .data-header-sub { font-size: 12px; color: var(--text-muted); }
+
+  .back-btn {
+    background: none;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .back-btn:hover { background: var(--bg-secondary); }
+
+  .data-tabs {
+    display: flex;
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 1.25rem;
+  }
+
+  .data-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -0.5px;
+    font-family: 'DM Sans', sans-serif;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .data-tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  .data-body { padding: 1.25rem; }
+
+  .data-textarea {
+    width: 100%;
+    min-height: 140px;
+    padding: 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg-secondary);
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .data-textarea:focus { outline: none; border-color: var(--green-mid); }
+
+  .data-textarea::placeholder { color: var(--text-muted); font-family: 'DM Sans', sans-serif; }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .upload-zone:hover { border-color: var(--green-mid); background: var(--green-light); }
+  .upload-zone.dragover { border-color: var(--green); background: var(--green-light); }
+
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: var(--text-muted); }
+  .upload-input { display: none; }
+
+  .question-input {
+    width: 100%;
+    padding: 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg-card);
+    margin-top: 1rem;
+    resize: none;
+    min-height: 80px;
+    line-height: 1.6;
+  }
+
+  .question-input:focus { outline: none; border-color: var(--green-mid); }
+  .question-input::placeholder { color: var(--text-muted); }
+
+  .data-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-top: 0.5px solid var(--border);
+    gap: 8px;
+  }
+
+  .btn-primary {
+    padding: 10px 22px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Chat interface */
+  .chat-section {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .chat-section.active { display: flex; }
+
+  .chat-context-bar {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: none;
+  }
+
+  .chat-context-label { font-size: 12px; color: var(--text-muted); }
+  .chat-context-value { font-size: 13px; color: var(--text); font-weight: 500; margin-top: 2px; }
+
+  .new-problem-btn {
+    background: none;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .new-problem-btn:hover { background: var(--bg-secondary); }
+
+  .chat-messages {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-top: 0.5px solid var(--border);
+    min-height: 380px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    animation: fadeUp 0.2s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500;
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  .msg-avatar.tutor { background: var(--green-light); color: var(--green); }
+  .msg-avatar.user { background: var(--bg-secondary); color: var(--text-secondary); }
+
+  .msg-bubble {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .msg-bubble.tutor {
+    background: var(--bg-secondary);
+    padding: 0.9rem 1rem;
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+  }
+
+  .msg-bubble.user {
+    background: var(--green-light);
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius) 0 var(--radius) var(--radius);
+    color: var(--green-dark);
+  }
+
+  .msg-bubble p { margin-bottom: 0.5rem; }
+  .msg-bubble p:last-child { margin-bottom: 0; }
+
+  .typing-indicator {
+    display: flex; gap: 4px; align-items: center; padding: 4px 0;
+  }
+
+  .typing-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-muted);
+    animation: blink 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.9); }
+    40% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .chat-input-bar {
+    display: flex;
+    gap: 8px;
+    padding: 0.9rem 1.25rem;
+    border: 0.5px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    background: var(--bg-card);
+    align-items: flex-end;
+  }
+
+  .chat-input {
+    flex: 1;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg-secondary);
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    line-height: 1.5;
+  }
+
+  .chat-input:focus { outline: none; border-color: var(--green-mid); }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .send-btn {
+    width: 38px; height: 38px;
+    background: var(--green);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .send-btn:hover { background: var(--green-dark); }
+  .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  /* Limit screen */
+  .limit-section {
+    display: none;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .limit-section.active { display: block; }
+
+  .limit-icon { font-size: 36px; margin-bottom: 1rem; }
+
+  .limit-title {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .limit-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-width: 420px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .limit-badge {
+    display: inline-block;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: 20px;
+  }
+
+  /* Problem counter dots */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .progress-dot.done { background: var(--green-mid); }
+  .progress-dot.active { background: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Grad<span>Stat</span></div>
+  <div class="sessions-badge">
+    <div class="sessions-dot" id="sessions-dot"></div>
+    <span id="sessions-label">3 sessions remaining</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progress-dots">
+    <div class="progress-dot active" id="dot-0"></div>
+    <div class="progress-dot" id="dot-1"></div>
+    <div class="progress-dot" id="dot-2"></div>
+  </div>
+
+  <!-- Welcome -->
+  <div class="welcome" id="welcome-screen">
+    <div class="welcome-tag">Beta — Free Preview</div>
+    <h1>Stuck on stats?<br><em>Let's work through it.</em></h1>
+    <p>Bring your data and your question. GradStat will teach you the why, guide you through every step, and tell you when you've got it — but never just give you the answer.</p>
+    <div class="start-options">
+      <div class="start-card" onclick="startSession('paste')">
+        <div class="start-card-icon">📋</div>
+        <div class="start-card-title">Paste my data</div>
+        <div class="start-card-desc">Copy from Excel, SPSS, or type it in manually</div>
+      </div>
+      <div class="start-card" onclick="startSession('upload')">
+        <div class="start-card-icon">📂</div>
+        <div class="start-card-title">Upload a CSV</div>
+        <div class="start-card-desc">Upload your dataset file directly</div>
+      </div>
+      <div class="start-card" onclick="startSession('question')">
+        <div class="start-card-icon">❓</div>
+        <div class="start-card-title">Just a question</div>
+        <div class="start-card-desc">Describe your stats problem in plain English</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data input -->
+  <div class="data-section" id="data-section">
+    <div class="data-header">
+      <div class="data-header-left">
+        <div>
+          <div class="data-header-title">Set up your problem</div>
+          <div class="data-header-sub">Add your data and describe what you're trying to do</div>
+        </div>
+      </div>
+      <button class="back-btn" onclick="goBack()">← Back</button>
+    </div>
+
+    <div class="data-tabs" id="data-tabs">
+      <button class="data-tab active" onclick="switchTab('paste')" id="tab-paste">Paste data</button>
+      <button class="data-tab" onclick="switchTab('upload')" id="tab-upload">Upload CSV</button>
+    </div>
+
+    <div class="data-body">
+      <div id="panel-paste">
+        <textarea class="data-textarea" id="paste-input" placeholder="Paste your data here — e.g.:
+Group, Score
+Control, 72
+Control, 68
+Treatment, 85
+Treatment, 91
+..."></textarea>
+      </div>
+
+      <div id="panel-upload" style="display:none;">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">📁</div>
+          <div class="upload-label">Click to upload or drag and drop</div>
+          <div class="upload-sub">CSV files only</div>
+          <input type="file" class="upload-input" id="file-input" accept=".csv" onchange="handleFile(event)" />
+        </div>
+        <div id="file-name" style="font-size:13px; color:var(--green); margin-top:8px; text-align:center;"></div>
+      </div>
+
+      <textarea class="question-input" id="question-input" placeholder="Describe your stats problem or assignment question — e.g. 'I need to compare test scores between two groups' or 'My professor wants me to run a regression on this data'"></textarea>
+    </div>
+
+    <div class="data-footer">
+      <button class="btn-primary" id="start-btn" onclick="beginSession()">Start learning →</button>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-section" id="chat-section">
+    <div class="chat-context-bar">
+      <div>
+        <div class="chat-context-label">Current problem</div>
+        <div class="chat-context-value" id="context-summary">—</div>
+      </div>
+      <button class="new-problem-btn" onclick="newProblem()">+ New problem</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-bar">
+      <textarea class="chat-input" id="chat-input" placeholder="Type your answer or ask a question..." rows="1" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 8h12M9 3l5 5-5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Limit reached -->
+  <div class="limit-section" id="limit-screen">
+    <div class="limit-icon">🎓</div>
+    <div class="limit-title">You've used your 3 free sessions</div>
+    <div class="limit-sub">That's 3 stats concepts you actually understand now — not just copied. GradStat is coming soon with unlimited sessions.</div>
+    <div class="limit-badge">Join the waitlist → gradstat.app</div>
+  </div>
+
+</div>
+
+<script>
+  const MAX_PROBLEMS = 3;
+  let problemsUsed = parseInt(localStorage.getItem('sb_problems') || '0');
+  let conversationHistory = [];
+  let currentData = '';
+  let currentQuestion = '';
+  let activeTab = 'paste';
+  let uploadedCSV = '';
+
+  const SYSTEM_PROMPT = `You are GradStat, a warm and encouraging stats tutor for graduate students in psychology and social sciences. Your entire purpose is to teach — never to give answers directly.
+
+CORE RULES (never break these):
+1. NEVER give the final answer, solution, or completed output to any stats problem
+2. NEVER run the analysis for the student or show final computed results
+3. ALWAYS teach through Socratic questioning — ask guiding questions that lead students to discover the answer themselves
+4. When a student gets a step right, celebrate it warmly and move to the next step
+5. When a student gets something wrong, gently redirect with a hint or a question — never say "wrong," say things like "not quite — let's think about this differently"
+6. Break every problem into small digestible steps — one step at a time
+7. Always explain the WHY before the HOW — what does this test actually mean conceptually?
+8. Use plain, relatable language — you're a peer tutor, not a professor
+9. Reference SPSS or R syntax when relevant but teach the concept first
+10. If a student asks you to just give the answer, kindly but firmly explain that your job is to help them truly understand it
+
+YOUR PERSONALITY:
+- Warm, encouraging, relatable — like a brilliant friend who gets stats
+- You remember how confusing this stuff felt at first
+- You celebrate small wins genuinely
+- You never make students feel dumb for not knowing something
+- You use phrases like "okay so here's the cool thing about this..." or "great question — let's break this down"
+
+START of every session:
+1. Acknowledge what the student has shared
+2. Identify the appropriate statistical test/method (but ask them to confirm or figure it out if possible)
+3. Start with the conceptual why — what is this test actually measuring?
+4. Then walk through execution step by step
+
+Remember: a student truly understanding one concept is worth more than getting 10 answers handed to them.`;
+
+  function updateUI() {
+    const remaining = MAX_PROBLEMS - problemsUsed;
+    const label = document.getElementById('sessions-label');
+    const dot = document.getElementById('sessions-dot');
+    label.textContent = remaining === 1 ? '1 session remaining' : `${remaining} sessions remaining`;
+    if (remaining <= 1) { dot.className = 'sessions-dot out'; }
+    else if (remaining <= 2) { dot.className = 'sessions-dot warn'; }
+    else { dot.className = 'sessions-dot'; }
+
+    for (let i = 0; i < MAX_PROBLEMS; i++) {
+      const d = document.getElementById(`dot-${i}`);
+      if (!d) continue;
+      if (i < problemsUsed) d.className = 'progress-dot done';
+      else if (i === problemsUsed) d.className = 'progress-dot active';
+      else d.className = 'progress-dot';
+    }
+  }
+
+  function startSession(type) {
+    if (problemsUsed >= MAX_PROBLEMS) { showLimit(); return; }
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('data-section').classList.add('active');
+    activeTab = type === 'question' ? 'paste' : type;
+    switchTab(activeTab);
+    if (type === 'question') {
+      document.getElementById('paste-input').style.display = 'none';
+      document.getElementById('tab-paste').style.display = 'none';
+      document.getElementById('tab-upload').style.display = 'none';
+    }
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('panel-paste').style.display = tab === 'paste' ? 'block' : 'none';
+    document.getElementById('panel-upload').style.display = tab === 'upload' ? 'block' : 'none';
+    document.querySelectorAll('.data-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      uploadedCSV = ev.target.result;
+      document.getElementById('file-name').textContent = `✓ ${file.name} loaded`;
+    };
+    reader.readAsText(file);
+  }
+
+  const uploadZone = document.getElementById('upload-zone');
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      const reader = new FileReader();
+      reader.onload = ev => { uploadedCSV = ev.target.result; document.getElementById('file-name').textContent = `✓ ${file.name} loaded`; };
+      reader.readAsText(file);
+    }
+  });
+
+  function goBack() {
+    document.getElementById('data-section').classList.remove('active');
+    document.getElementById('welcome-screen').style.display = 'block';
+    document.getElementById('paste-input').style.display = 'block';
+    document.getElementById('tab-paste').style.display = 'inline-block';
+    document.getElementById('tab-upload').style.display = 'inline-block';
+  }
+
+  async function beginSession() {
+    const question = document.getElementById('question-input').value.trim();
+    const pasteData = document.getElementById('paste-input').value.trim();
+    const data = activeTab === 'upload' ? uploadedCSV : pasteData;
+
+    if (!question) {
+      document.getElementById('question-input').style.borderColor = '#E24B4A';
+      document.getElementById('question-input').placeholder = 'Please describe your stats problem first...';
+      return;
+    }
+
+    currentQuestion = question;
+    currentData = data;
+    conversationHistory = [];
+    problemsUsed++;
+    localStorage.setItem('sb_problems', problemsUsed);
+    updateUI();
+
+    const summary = question.length > 60 ? question.substring(0, 57) + '...' : question;
+    document.getElementById('context-summary').textContent = summary;
+
+    document.getElementById('data-section').classList.remove('active');
+    document.getElementById('chat-section').classList.add('active');
+    document.getElementById('chat-messages').innerHTML = '';
+
+    const userContent = data
+      ? `Here's my stats problem:\n\n${question}\n\nHere's my data:\n${data}`
+      : `Here's my stats problem:\n\n${question}`;
+
+    conversationHistory.push({ role: 'user', content: userContent });
+    appendUserMessage(question + (data ? '\n\n[Data attached]' : ''));
+    await fetchTutorResponse();
+  }
+
+  function appendUserMessage(text) {
+    const msgs = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `
+      <div class="msg-avatar user">You</div>
+      <div class="msg-bubble user">${escapeHtml(text)}</div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function appendTutorMessage(text) {
+    const msgs = document.getElementById('chat-messages');
+    const typing = document.getElementById('typing-msg');
+    if (typing) typing.remove();
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.innerHTML = `
+      <div class="msg-avatar tutor">SB</div>
+      <div class="msg-bubble tutor">${formatMessage(text)}</div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'msg'; div.id = 'typing-msg';
+    div.innerHTML = `
+      <div class="msg-avatar tutor">SB</div>
+      <div class="msg-bubble tutor"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>
+    `;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  async function fetchTutorResponse() {
+    const sendBtn = document.getElementById('send-btn');
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01' },        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: conversationHistory
+        })
+      });
+
+      const data = await response.json();
+      const reply = data.content?.[0]?.text || "Hmm, something went wrong on my end. Try refreshing!";
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendTutorMessage(reply);
+    } catch (err) {
+      const typing = document.getElementById('typing-msg');
+      if (typing) typing.remove();
+      appendTutorMessage("Oops — I had trouble connecting. Check your internet and try again!");
+    }
+
+    sendBtn.disabled = false;
+    document.getElementById('chat-input').focus();
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    conversationHistory.push({ role: 'user', content: text });
+    appendUserMessage(text);
+    await fetchTutorResponse();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+    const ta = document.getElementById('chat-input');
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+  }
+
+  function newProblem() {
+    if (problemsUsed >= MAX_PROBLEMS) { showLimit(); return; }
+    document.getElementById('chat-section').classList.remove('active');
+    document.getElementById('question-input').value = '';
+    document.getElementById('paste-input').value = '';
+    document.getElementById('file-name').textContent = '';
+    uploadedCSV = '';
+    document.getElementById('welcome-screen').style.display = 'block';
+    document.getElementById('paste-input').style.display = 'block';
+    document.getElementById('tab-paste').style.display = 'inline-block';
+    document.getElementById('tab-upload').style.display = 'inline-block';
+    updateUI();
+  }
+
+  function showLimit() {
+    document.getElementById('welcome-screen').style.display = 'none';
+    document.getElementById('chat-section').classList.remove('active');
+    document.getElementById('data-section').classList.remove('active');
+    document.getElementById('limit-screen').classList.add('active');
+    document.getElementById('progress-dots').style.display = 'none';
+  }
+
+  function formatMessage(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code style="font-family:DM Mono,monospace;background:rgba(0,0,0,0.06);padding:1px 5px;border-radius:4px;font-size:12px;">$1</code>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/^/, '<p>').replace(/$/, '</p>');
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  updateUI();
+  if (problemsUsed >= MAX_PROBLEMS) { showLimit(); }
+</script>
+</body>
+</html>
