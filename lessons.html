@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GradStat — Lessons</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-mid: #1D9E75;
+    --green-dark: #085041;
+    --amber: #BA7517;
+    --amber-light: #FAEEDA;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --text: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #888;
+    --border: #e0e0e0;
+    --bg: #fafaf8;
+    --bg-card: #ffffff;
+    --bg-secondary: #f5f4f0;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-card);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .logo span { font-style: italic; font-weight: 400; }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .back-link:hover { background: var(--bg-secondary); }
+
+  /* Lesson nav */
+  .lesson-nav {
+    display: flex;
+    gap: 8px;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-card);
+    overflow-x: auto;
+  }
+
+  .lesson-tab {
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .lesson-tab:hover { border-color: var(--green-mid); color: var(--green); }
+  .lesson-tab.active { background: var(--green); color: white; border-color: var(--green); }
+
+  /* Main content */
+  .main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* Lesson page */
+  .lesson-page { display: none; }
+  .lesson-page.active { display: block; }
+
+  /* Lesson hero */
+  .lesson-hero {
+    margin-bottom: 2rem;
+  }
+
+  .lesson-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .lesson-tag-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  .lesson-title {
+    font-family: 'Lora', serif;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .lesson-title em { font-style: italic; }
+
+  .lesson-intro {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    margin: 1.5rem 0;
+  }
+
+  .progress-step {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .progress-step.done { background: var(--green-mid); }
+  .progress-step.active { background: var(--green); }
+
+  /* Sections */
+  .lesson-section {
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .lesson-section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Section label */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .section-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--green);
+    color: white;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  /* Example block */
+  .example-block {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .example-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 0.5rem;
+  }
+
+  .example-text {
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* Content blocks */
+  .content-block {
+    margin-bottom: 1.5rem;
+  }
+
+  .content-block h3 {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .content-block p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+
+  .content-block p:last-child { margin-bottom: 0; }
+
+  /* Info cards */
+  .info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 0.5px solid var(--border);
+  }
+
+  .info-card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .info-card-value {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* Use/don't use */
+  .use-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .use-card {
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 0.5px solid var(--border);
+  }
+
+  .use-card.yes { background: var(--green-light); border-color: #9FE1CB; }
+  .use-card.no { background: #FCEBEB; border-color: #F7C1C1; }
+
+  .use-card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .use-card.yes .use-card-label { color: var(--green); }
+  .use-card.no .use-card-label { color: #A32D2D; }
+
+  .use-card ul { padding-left: 1rem; }
+  .use-card li {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 3px;
+  }
+
+  /* Code blocks */
+  .code-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+
+  .code-tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    cursor: pointer;
+    border: 0.5px solid var(--border);
+    border-bottom: none;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .code-tab.active { background: #1a1a1a; color: #e0e0e0; border-color: #1a1a1a; }
+
+  .code-block {
+    background: #1a1a1a;
+    border-radius: 0 var(--radius) var(--radius) var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #e0e0e0;
+    line-height: 1.8;
+    white-space: pre;
+  }
+
+  .code-comment { color: #666; }
+  .code-keyword { color: #9FE1CB; }
+  .code-string { color: #FAC775; }
+  .code-function { color: #85B7EB; }
+
+  .code-panel { display: none; }
+  .code-panel.active { display: block; }
+
+  /* APA block */
+  .apa-block {
+    background: var(--blue-light);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .apa-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 0.5rem;
+  }
+
+  .apa-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.8;
+  }
+
+  .apa-note {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+    line-height: 1.6;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Nav buttons */
+  .section-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .btn-prev {
+    padding: 10px 20px;
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-prev:hover { background: var(--bg-secondary); }
+
+  .btn-next {
+    padding: 10px 24px;
+    background: var(--green);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-next:hover { background: var(--green-dark); }
+
+  .section-counter {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* Complete badge */
+  .complete-badge {
+    text-align: center;
+    padding: 2rem;
+    background: var(--green-light);
+    border-radius: var(--radius);
+    margin-top: 1.5rem;
+  }
+
+  .complete-icon { font-size: 32px; margin-bottom: 0.5rem; }
+  .complete-title {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green-dark);
+    margin-bottom: 0.25rem;
+  }
+
+  .complete-sub { font-size: 14px; color: var(--green); }
+
+  .btn-practice {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 10px 24px;
+    background: var(--green);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="logo">Grad<span>Stat</span></a>
+  <a href="index.html" class="back-link">← Back to tutor</a>
+</div>
+
+<div class="lesson-nav">
+  <button class="lesson-tab active" onclick="switchLesson('ttest')">📊 Independent t-test</button>
+  <button class="lesson-tab" onclick="switchLesson('anova')">📈 One-Way ANOVA</button>
+  <button class="lesson-tab" onclick="switchLesson('regression')">📉 Linear Regression</button>
+</div>
+
+<div class="main">
+
+  <!-- ===================== T-TEST ===================== -->
+  <div class="lesson-page active" id="lesson-ttest">
+
+    <div class="lesson-hero">
+      <div class="lesson-tag">
+        <div class="lesson-tag-dot" style="background: var(--green);"></div>
+        Lesson 1 of 3
+      </div>
+      <h1 class="lesson-title">The Independent <em>t</em>-test</h1>
+      <p class="lesson-intro">Comparing two groups? This is your test. Let's start with a real scenario you'll actually recognize.</p>
+    </div>
+
+    <div class="progress-bar" id="progress-ttest">
+      <div class="progress-step active" onclick="goToSection('ttest',0)"></div>
+      <div class="progress-step" onclick="goToSection('ttest',1)"></div>
+      <div class="progress-step" onclick="goToSection('ttest',2)"></div>
+      <div class="progress-step" onclick="goToSection('ttest',3)"></div>
+    </div>
+
+    <!-- Section 0: Real example -->
+    <div class="lesson-section active" id="ttest-0">
+      <div class="section-label"><div class="section-num">1</div> Real example first</div>
+
+      <div class="example-block">
+        <div class="example-label">Picture this</div>
+        <div class="example-text">You're studying whether a new CBT intervention reduces anxiety scores. You have two groups — one that received CBT and one that didn't. Both groups completed the GAD-7 anxiety scale at the end of the study. You want to know: did the CBT group score meaningfully lower than the control group?</div>
+      </div>
+
+      <div class="content-block">
+        <h3>So what are we actually asking?</h3>
+        <p>You have two separate groups of people, and you measured one thing (anxiety scores). The question is simple: are the average scores different enough between the two groups that it's probably not just chance?</p>
+        <p>That's it. That's all a t-test is asking. "Are these two group averages far enough apart that something real is probably going on?"</p>
+      </div>
+
+      <div class="content-block">
+        <h3>What does the t-test actually do?</h3>
+        <p>It looks at the difference between your two group means and compares that difference to how much natural variability exists in your data. If the difference is big relative to the variability — boom, statistically significant.</p>
+        <p>The output gives you a <strong>t-value</strong> and a <strong>p-value</strong>. The p-value is what you care about most — if it's below .05, you have a statistically significant difference.</p>
+      </div>
+
+      <div class="section-nav">
+        <div></div>
+        <div class="section-counter">1 of 4</div>
+        <button class="btn-next" onclick="nextSection('ttest', 0)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 1: When to use it -->
+    <div class="lesson-section" id="ttest-1">
+      <div class="section-label"><div class="section-num">2</div> When to use it</div>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-label">Groups</div>
+          <div class="info-card-value">Exactly 2 independent groups</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Variable type</div>
+          <div class="info-card-value">Continuous outcome (scores, measures)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Relationship</div>
+          <div class="info-card-value">Groups are unrelated (different people)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Question</div>
+          <div class="info-card-value">"Is there a difference between these two groups?"</div>
+        </div>
+      </div>
+
+      <div class="use-cards">
+        <div class="use-card yes">
+          <div class="use-card-label">✓ Use it when</div>
+          <ul>
+            <li>Comparing treatment vs control</li>
+            <li>Male vs female on a scale</li>
+            <li>Two different schools/sites</li>
+            <li>Intervention vs no intervention</li>
+          </ul>
+        </div>
+        <div class="use-card no">
+          <div class="use-card-label">✗ Don't use it when</div>
+          <ul>
+            <li>You have 3+ groups (use ANOVA)</li>
+            <li>Same people measured twice (use paired t-test)</li>
+            <li>Your outcome is categorical (use chi-square)</li>
+            <li>You want to predict, not compare</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('ttest', 1)">← Back</button>
+        <div class="section-counter">2 of 4</div>
+        <button class="btn-next" onclick="nextSection('ttest', 1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 2: Running it -->
+    <div class="lesson-section" id="ttest-2">
+      <div class="section-label"><div class="section-num">3</div> Running it in SPSS & R</div>
+
+      <div class="content-block">
+        <p>Your data needs two columns — one for the group (coded as numbers, like 0 and 1) and one for the score. Like this:</p>
+      </div>
+
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCode('ttest', 'spss')">SPSS</button>
+        <button class="code-tab" onclick="switchCode('ttest', 'r')">R</button>
+      </div>
+
+      <div class="code-block">
+        <div class="code-panel active" id="ttest-code-spss">
+          <code><span class="code-comment">/* In SPSS, use the menu: */</span>
+Analyze
+  → Compare Means
+    → Independent-Samples T Test
+
+<span class="code-comment">/* Set up: */</span>
+Test Variable(s): <span class="code-string">anxiety_score</span>
+Grouping Variable: <span class="code-string">group</span>
+Define Groups: Group 1 = <span class="code-string">0</span>, Group 2 = <span class="code-string">1</span>
+
+<span class="code-comment">/* Click OK and look for: */</span>
+- Levene's Test (check equal variances)
+- t-value, df, Sig. (2-tailed) ← your p-value</code>
+        </div>
+        <div class="code-panel" id="ttest-code-r">
+          <code><span class="code-comment"># Load your data first</span>
+data <- <span class="code-function">read.csv</span>(<span class="code-string">"mydata.csv"</span>)
+
+<span class="code-comment"># Run the t-test</span>
+<span class="code-function">t.test</span>(anxiety_score ~ group, data = data,
+       var.equal = <span class="code-keyword">TRUE</span>)
+
+<span class="code-comment"># Output shows:</span>
+<span class="code-comment"># t = your t-value</span>
+<span class="code-comment"># df = degrees of freedom</span>
+<span class="code-comment"># p-value = your significance</span>
+<span class="code-comment"># 95% CI = confidence interval</span></code>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <h3>Reading the output</h3>
+        <p>The most important numbers: your <strong>t-value</strong>, <strong>degrees of freedom (df)</strong>, and <strong>p-value</strong>. If p &lt; .05, the difference is statistically significant. Also check your group means — a significant result with a tiny mean difference might not be practically meaningful.</p>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('ttest', 2)">← Back</button>
+        <div class="section-counter">3 of 4</div>
+        <button class="btn-next" onclick="nextSection('ttest', 2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 3: APA reporting -->
+    <div class="lesson-section" id="ttest-3">
+      <div class="section-label"><div class="section-num">4</div> Reporting in APA format</div>
+
+      <div class="content-block">
+        <p>APA format for a t-test result follows a specific pattern. Here's the template and a filled-in example:</p>
+      </div>
+
+      <div class="apa-block">
+        <div class="apa-label">APA Template</div>
+        <div class="apa-text">A(n) [type] t-test was conducted to compare [outcome] in [group 1] and [group 2] conditions. There was a [significant/non-significant] difference in scores for [group 1] (M = ___, SD = ___) and [group 2] (M = ___, SD = ___) conditions; t(df) = ___, p = ___.</div>
+      </div>
+
+      <div class="apa-block">
+        <div class="apa-label">Filled-in Example</div>
+        <div class="apa-text">An independent samples t-test was conducted to compare anxiety scores in CBT and control conditions. There was a significant difference in scores for the CBT group (M = 8.2, SD = 2.1) and the control group (M = 12.4, SD = 2.8); t(48) = 6.34, p &lt; .001.</div>
+        <div class="apa-note">Note: Report exact p-values when possible (e.g., p = .032). Only use "p &lt; .001" when the value is smaller than .001. Always report means and standard deviations.</div>
+      </div>
+
+      <div class="complete-badge">
+        <div class="complete-icon">🎉</div>
+        <div class="complete-title">You finished the t-test lesson!</div>
+        <div class="complete-sub">Now try it with your own data in the tutor</div>
+        <a href="index.html" class="btn-practice">Practice with GradStat →</a>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('ttest', 3)">← Back</button>
+        <div class="section-counter">4 of 4</div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== ANOVA ===================== -->
+  <div class="lesson-page" id="lesson-anova">
+
+    <div class="lesson-hero">
+      <div class="lesson-tag">
+        <div class="lesson-tag-dot" style="background: var(--amber);"></div>
+        Lesson 2 of 3
+      </div>
+      <h1 class="lesson-title">One-Way <em>ANOVA</em></h1>
+      <p class="lesson-intro">Like a t-test, but for when you have three or more groups. More groups, more power — but also more to interpret.</p>
+    </div>
+
+    <div class="progress-bar" id="progress-anova">
+      <div class="progress-step active" onclick="goToSection('anova',0)"></div>
+      <div class="progress-step" onclick="goToSection('anova',1)"></div>
+      <div class="progress-step" onclick="goToSection('anova',2)"></div>
+      <div class="progress-step" onclick="goToSection('anova',3)"></div>
+    </div>
+
+    <!-- Section 0 -->
+    <div class="lesson-section active" id="anova-0">
+      <div class="section-label"><div class="section-num">1</div> Real example first</div>
+
+      <div class="example-block">
+        <div class="example-label">Picture this</div>
+        <div class="example-text">You're comparing depression scores across three treatment conditions — CBT, medication, and a waitlist control. You measured depression with the PHQ-9 after 8 weeks. You want to know: do any of the three groups differ significantly from each other?</div>
+      </div>
+
+      <div class="content-block">
+        <h3>Why not just run three t-tests?</h3>
+        <p>Great question — and this is exactly what trips people up. If you run three separate t-tests (CBT vs. med, CBT vs. control, med vs. control), you inflate your chance of a false positive. Every test has a 5% chance of a false positive, and those add up fast.</p>
+        <p>ANOVA tests all three groups simultaneously in one test, keeping your error rate honest at 5%.</p>
+      </div>
+
+      <div class="content-block">
+        <h3>What does ANOVA actually do?</h3>
+        <p>It compares the variance <em>between</em> your groups to the variance <em>within</em> your groups. If the groups are more different from each other than people are different within the same group — that's a signal something real is going on.</p>
+        <p>The output gives you an <strong>F-value</strong> and a <strong>p-value</strong>. But here's the catch — a significant ANOVA just tells you <em>that</em> a difference exists somewhere. It doesn't tell you <em>which</em> groups differ. That's what post-hoc tests are for.</p>
+      </div>
+
+      <div class="section-nav">
+        <div></div>
+        <div class="section-counter">1 of 4</div>
+        <button class="btn-next" onclick="nextSection('anova', 0)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="lesson-section" id="anova-1">
+      <div class="section-label"><div class="section-num">2</div> When to use it</div>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-label">Groups</div>
+          <div class="info-card-value">3 or more independent groups</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Variable type</div>
+          <div class="info-card-value">Continuous outcome (scores, measures)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Relationship</div>
+          <div class="info-card-value">Groups are independent (different people)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Follow-up</div>
+          <div class="info-card-value">Post-hoc tests (Tukey, Bonferroni) to find which groups differ</div>
+        </div>
+      </div>
+
+      <div class="use-cards">
+        <div class="use-card yes">
+          <div class="use-card-label">✓ Use it when</div>
+          <ul>
+            <li>3+ treatment conditions</li>
+            <li>Multiple demographic groups</li>
+            <li>Comparing multiple schools/sites</li>
+            <li>3+ dose levels of an intervention</li>
+          </ul>
+        </div>
+        <div class="use-card no">
+          <div class="use-card-label">✗ Don't use it when</div>
+          <ul>
+            <li>You only have 2 groups (use t-test)</li>
+            <li>Same people across conditions (use repeated measures ANOVA)</li>
+            <li>Multiple outcome variables (use MANOVA)</li>
+            <li>You want to control for a covariate (use ANCOVA)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('anova', 1)">← Back</button>
+        <div class="section-counter">2 of 4</div>
+        <button class="btn-next" onclick="nextSection('anova', 1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="lesson-section" id="anova-2">
+      <div class="section-label"><div class="section-num">3</div> Running it in SPSS & R</div>
+
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCode('anova', 'spss')">SPSS</button>
+        <button class="code-tab" onclick="switchCode('anova', 'r')">R</button>
+      </div>
+
+      <div class="code-block">
+        <div class="code-panel active" id="anova-code-spss">
+          <code><span class="code-comment">/* In SPSS, use the menu: */</span>
+Analyze
+  → Compare Means
+    → One-Way ANOVA
+
+<span class="code-comment">/* Set up: */</span>
+Dependent List: <span class="code-string">depression_score</span>
+Factor: <span class="code-string">treatment_group</span>
+
+<span class="code-comment">/* Click Post Hoc → check Tukey */</span>
+<span class="code-comment">/* Click Options → check Descriptive */</span>
+<span class="code-comment">/* Click OK */</span>
+
+<span class="code-comment">/* Look for: */</span>
+- F-value and Sig. in ANOVA table
+- Multiple Comparisons table (post-hoc)</code>
+        </div>
+        <div class="code-panel" id="anova-code-r">
+          <code><span class="code-comment"># Run one-way ANOVA</span>
+model <- <span class="code-function">aov</span>(depression_score ~ treatment_group,
+             data = data)
+<span class="code-function">summary</span>(model)
+
+<span class="code-comment"># Post-hoc Tukey test</span>
+<span class="code-function">TukeyHSD</span>(model)
+
+<span class="code-comment"># Output shows:</span>
+<span class="code-comment"># F value = your F-statistic</span>
+<span class="code-comment"># Pr(>F) = your p-value</span>
+<span class="code-comment"># Tukey: which pairs differ</span></code>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <h3>Don't skip the post-hoc tests</h3>
+        <p>A significant F just means <em>something</em> is different somewhere. Run Tukey's HSD (honestly significant difference) to find out which specific groups differ from each other. That's usually what your research question actually needs.</p>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('anova', 2)">← Back</button>
+        <div class="section-counter">3 of 4</div>
+        <button class="btn-next" onclick="nextSection('anova', 2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="lesson-section" id="anova-3">
+      <div class="section-label"><div class="section-num">4</div> Reporting in APA format</div>
+
+      <div class="apa-block">
+        <div class="apa-label">APA Template</div>
+        <div class="apa-text">A one-way ANOVA was conducted to compare [outcome] across [groups]. There was a [significant/non-significant] effect of [group variable] on [outcome], F(df_between, df_within) = ___, p = ___. Post hoc comparisons using Tukey's HSD indicated that [group A] (M = ___, SD = ___) differed significantly from [group B] (M = ___, SD = ___).</div>
+      </div>
+
+      <div class="apa-block">
+        <div class="apa-label">Filled-in Example</div>
+        <div class="apa-text">A one-way ANOVA was conducted to compare depression scores across CBT, medication, and waitlist control conditions. There was a significant effect of treatment condition on depression scores, F(2, 87) = 14.32, p &lt; .001. Post hoc comparisons using Tukey's HSD indicated that the CBT group (M = 7.4, SD = 2.3) and the medication group (M = 8.1, SD = 2.7) both scored significantly lower than the waitlist control group (M = 13.6, SD = 3.1), p &lt; .001.</div>
+        <div class="apa-note">Note: The two numbers in F(2, 87) are degrees of freedom between groups and within groups. Both come straight from your ANOVA table output.</div>
+      </div>
+
+      <div class="complete-badge">
+        <div class="complete-icon">🎉</div>
+        <div class="complete-title">You finished the ANOVA lesson!</div>
+        <div class="complete-sub">Now try it with your own data in the tutor</div>
+        <a href="index.html" class="btn-practice">Practice with GradStat →</a>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('anova', 3)">← Back</button>
+        <div class="section-counter">4 of 4</div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== REGRESSION ===================== -->
+  <div class="lesson-page" id="lesson-regression">
+
+    <div class="lesson-hero">
+      <div class="lesson-tag">
+        <div class="lesson-tag-dot" style="background: var(--blue);"></div>
+        Lesson 3 of 3
+      </div>
+      <h1 class="lesson-title">Linear <em>Regression</em></h1>
+      <p class="lesson-intro">When you want to predict one thing from another — or understand what's driving an outcome. This is where stats gets really useful.</p>
+    </div>
+
+    <div class="progress-bar" id="progress-regression">
+      <div class="progress-step active" onclick="goToSection('regression',0)"></div>
+      <div class="progress-step" onclick="goToSection('regression',1)"></div>
+      <div class="progress-step" onclick="goToSection('regression',2)"></div>
+      <div class="progress-step" onclick="goToSection('regression',3)"></div>
+    </div>
+
+    <!-- Section 0 -->
+    <div class="lesson-section active" id="regression-0">
+      <div class="section-label"><div class="section-num">1</div> Real example first</div>
+
+      <div class="example-block">
+        <div class="example-label">Picture this</div>
+        <div class="example-text">You want to know if the number of therapy sessions someone attends predicts their depression score at the end of treatment. More sessions → lower depression? You have both variables measured for 60 participants and you want to quantify that relationship.</div>
+      </div>
+
+      <div class="content-block">
+        <h3>What does regression actually do?</h3>
+        <p>It draws the best possible straight line through your data that predicts your outcome variable (depression score) from your predictor variable (number of sessions). That line has a slope — and the slope tells you how much the outcome changes for every one-unit increase in the predictor.</p>
+        <p>It also tells you <strong>R²</strong> — how much of the variation in your outcome is explained by your predictor. An R² of .40 means your predictor explains 40% of the variance in the outcome. That's actually pretty good in psychology research.</p>
+      </div>
+
+      <div class="content-block">
+        <h3>Simple vs. multiple regression</h3>
+        <p>Simple regression = one predictor. Multiple regression = two or more predictors (e.g., sessions + baseline severity → depression score). Multiple regression is what you'll use most in research — it lets you control for confounds.</p>
+      </div>
+
+      <div class="section-nav">
+        <div></div>
+        <div class="section-counter">1 of 4</div>
+        <button class="btn-next" onclick="nextSection('regression', 0)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="lesson-section" id="regression-1">
+      <div class="section-label"><div class="section-num">2</div> When to use it</div>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-card-label">Goal</div>
+          <div class="info-card-value">Predict or explain an outcome</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Outcome variable</div>
+          <div class="info-card-value">Continuous (scores, measures)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Predictors</div>
+          <div class="info-card-value">Continuous or categorical (coded)</div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-label">Key output</div>
+          <div class="info-card-value">β coefficients, R², p-values</div>
+        </div>
+      </div>
+
+      <div class="use-cards">
+        <div class="use-card yes">
+          <div class="use-card-label">✓ Use it when</div>
+          <ul>
+            <li>Predicting an outcome from variables</li>
+            <li>Controlling for confounds</li>
+            <li>Testing if X predicts Y</li>
+            <li>Exploring relationships between variables</li>
+          </ul>
+        </div>
+        <div class="use-card no">
+          <div class="use-card-label">✗ Don't use it when</div>
+          <ul>
+            <li>Your outcome is categorical (use logistic regression)</li>
+            <li>You just want to compare group means (use t-test/ANOVA)</li>
+            <li>You have non-linear relationships</li>
+            <li>Data violates normality badly</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('regression', 1)">← Back</button>
+        <div class="section-counter">2 of 4</div>
+        <button class="btn-next" onclick="nextSection('regression', 1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="lesson-section" id="regression-2">
+      <div class="section-label"><div class="section-num">3</div> Running it in SPSS & R</div>
+
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCode('regression', 'spss')">SPSS</button>
+        <button class="code-tab" onclick="switchCode('regression', 'r')">R</button>
+      </div>
+
+      <div class="code-block">
+        <div class="code-panel active" id="regression-code-spss">
+          <code><span class="code-comment">/* In SPSS, use the menu: */</span>
+Analyze
+  → Regression
+    → Linear
+
+<span class="code-comment">/* Set up: */</span>
+Dependent: <span class="code-string">depression_score</span>
+Independent(s): <span class="code-string">num_sessions</span>
+
+<span class="code-comment">/* Click Statistics → check: */</span>
+<span class="code-comment">/* Estimates, Confidence intervals, R squared */</span>
+<span class="code-comment">/* Click OK */</span>
+
+<span class="code-comment">/* Look for: */</span>
+- Model Summary: R, R², Adjusted R²
+- ANOVA table: F and Sig.
+- Coefficients: B, Beta, t, Sig.</code>
+        </div>
+        <div class="code-panel" id="regression-code-r">
+          <code><span class="code-comment"># Run simple linear regression</span>
+model <- <span class="code-function">lm</span>(depression_score ~ num_sessions,
+            data = data)
+<span class="code-function">summary</span>(model)
+
+<span class="code-comment"># Multiple regression (add predictors)</span>
+model2 <- <span class="code-function">lm</span>(depression_score ~ num_sessions +
+              baseline_severity, data = data)
+<span class="code-function">summary</span>(model2)
+
+<span class="code-comment"># Output shows:</span>
+<span class="code-comment"># Coefficients: Estimate (B), p-value</span>
+<span class="code-comment"># Multiple R-squared: variance explained</span>
+<span class="code-comment"># F-statistic: overall model significance</span></code>
+        </div>
+      </div>
+
+      <div class="content-block">
+        <h3>Reading the output</h3>
+        <p>Focus on three things: <strong>R²</strong> (how much variance is explained), the <strong>F-test p-value</strong> (is the overall model significant?), and the <strong>β coefficients</strong> with their p-values (which predictors are significant, and in which direction?).</p>
+        <p>A negative β means more of that predictor = lower outcome. A positive β means more = higher. The size of β tells you the magnitude of the effect.</p>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('regression', 2)">← Back</button>
+        <div class="section-counter">3 of 4</div>
+        <button class="btn-next" onclick="nextSection('regression', 2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="lesson-section" id="regression-3">
+      <div class="section-label"><div class="section-num">4</div> Reporting in APA format</div>
+
+      <div class="apa-block">
+        <div class="apa-label">APA Template</div>
+        <div class="apa-text">A simple linear regression was performed to predict [outcome] from [predictor]. The results of the regression indicated that [predictor] significantly predicted [outcome], F(df1, df2) = ___, p = ___, R² = ___. [Predictor] was a [positive/negative] predictor of [outcome] (β = ___, p = ___).</div>
+      </div>
+
+      <div class="apa-block">
+        <div class="apa-label">Filled-in Example</div>
+        <div class="apa-text">A simple linear regression was performed to predict depression scores from number of therapy sessions attended. The results indicated that session attendance significantly predicted depression scores, F(1, 58) = 18.74, p &lt; .001, R² = .24. Number of sessions was a significant negative predictor of depression scores (β = −.49, p &lt; .001), indicating that greater session attendance was associated with lower depression scores.</div>
+        <div class="apa-note">Note: Report standardized β (Beta) for comparing predictors, or unstandardized B with SE when the raw scale matters. R² tells your reader how much variance your model explains — always include it.</div>
+      </div>
+
+      <div class="complete-badge">
+        <div class="complete-icon">🎉</div>
+        <div class="complete-title">You finished the Regression lesson!</div>
+        <div class="complete-sub">Now try it with your own data in the tutor</div>
+        <a href="index.html" class="btn-practice">Practice with GradStat →</a>
+      </div>
+
+      <div class="section-nav">
+        <button class="btn-prev" onclick="prevSection('regression', 3)">← Back</button>
+        <div class="section-counter">4 of 4</div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const lessonStates = { ttest: 0, anova: 0, regression: 0 };
+  const lessonSections = { ttest: 4, anova: 4, regression: 4 };
+
+  function switchLesson(lesson) {
+    document.querySelectorAll('.lesson-page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.lesson-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`lesson-${lesson}`).classList.add('active');
+    event.target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goToSection(lesson, idx) {
+    const current = lessonStates[lesson];
+    document.getElementById(`${lesson}-${current}`).classList.remove('active');
+    document.getElementById(`${lesson}-${idx}`).classList.add('active');
+    lessonStates[lesson] = idx;
+    updateProgress(lesson);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function nextSection(lesson, current) {
+    const next = current + 1;
+    if (next >= lessonSections[lesson]) return;
+    goToSection(lesson, next);
+  }
+
+  function prevSection(lesson, current) {
+    const prev = current - 1;
+    if (prev < 0) return;
+    goToSection(lesson, prev);
+  }
+
+  function updateProgress(lesson) {
+    const current = lessonStates[lesson];
+    const total = lessonSections[lesson];
+    const bar = document.getElementById(`progress-${lesson}`);
+    bar.querySelectorAll('.progress-step').forEach((step, i) => {
+      step.classList.remove('active', 'done');
+      if (i < current) step.classList.add('done');
+      else if (i === current) step.classList.add('active');
+    });
+  }
+
+  function switchCode(lesson, lang) {
+    const block = document.querySelector(`#lesson-${lesson} .code-block`);
+    block.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    block.querySelector(`#${lesson}-code-${lang}`).classList.add('active');
+    const tabs = document.querySelector(`#lesson-${lesson} .code-tabs`);
+    tabs.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>
